@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 # Pydantic models
 class SignupRequest(BaseModel):
     username: str
