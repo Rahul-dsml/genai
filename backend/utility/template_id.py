@@ -1,4 +1,6 @@
 import random
+import requests
+
 
 # TEMPLATE_IDS = {
 #     "sad": ["61579", "8072285", "56225174"],  # One Does Not Simply, Crying Jordan, Sad Pablo Escobar
@@ -129,8 +131,6 @@ def get_random_template(category):
         raise ValueError(f"No templates found for category '{category}'")
     return random.choice(templates)
 
-
-import requests
 
 def generate_meme(template_id, text0, username, password):
     url = "https://api.imgflip.com/caption_image"
