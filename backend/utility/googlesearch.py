@@ -54,9 +54,9 @@ def google_search(args: GoogleSearchArgs) -> List[dict]:
         st.error(f"Error during Google Search API call: {e}")
         return []
     results=[]
-    if len(history_manager.get_history("xyz"))==0:
+    if len(history_manager.get_history("metadata"))==0:
         for item in response_data.get("items", []):
-            history_manager.add_entry("xyz",{
+            history_manager.add_entry("metadata",{
                 "title": item.get("title"),
                 "link": item.get("link"),
                 "snippet": item.get("snippet"),
@@ -66,9 +66,13 @@ def google_search(args: GoogleSearchArgs) -> List[dict]:
                 "title": item.get("title"),
                 "snippet": item.get("snippet")})
     else:
-         history_manager.clear_history("xyz")
+         history_manager.clear_history("metadata")
+         history_manager.clear_history("post_history")
+         history_manager.clear_history("meme_history")
+         history_manager.clear_history("image_history")
+         history_manager.clear_history("summary")
          for item in response_data.get("items", []):
-            history_manager.add_entry("xyz",{
+            history_manager.add_entry("metadata",{
                 "title": item.get("title"),
                 "link": item.get("link"),
                 "snippet": item.get("snippet"),
