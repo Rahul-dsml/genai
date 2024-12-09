@@ -114,12 +114,13 @@ User Conversation history: {text_post_history}
 
 current user input: ```{query}```
 
-final_response:
-Social Media Post:
+final output should be following json format:
+{{"social_media_post":"write the post here.."}}
 """
         text_post= await gorq_call(text_generation_prompt)
-        history_manager.add_entry("post_history", {"user": query, "assistant": text_post})
-        return JSONResponse(content={"text_post":text_post},status_code=200)
+        text_post_1 = eval(text_post[text_post.find("{"):text_post.rfind("}")+1])['social_media_post']
+        history_manager.add_entry("post_history", {"user": query, "assistant": text_post_1})
+        return JSONResponse(content={"text_post":text_post_1},status_code=200)
     except Exception:
         # Handle unexpected errors and return a bad request response
         print("Error:", e)
@@ -220,8 +221,8 @@ User Conversation history: {image_history}
 
 current user input: ```{query}```
 
-Final output must be just the generated prompt without any tags or header:
-
+Final output should be in the following JSON format:
+{{"image_prompt":"please write image prompt here"}}
 """
         # Generate the image prompt using the LLM
         image_prompt_generated= await gorq_call(image_generation_prompt)
@@ -231,8 +232,7 @@ Final output must be just the generated prompt without any tags or header:
             # prompt = eval(image_prompt_generated[image_prompt_generated.find("{"):image_prompt_generated.rfind("}")+1])
         except:
             # Fallback parsing for improperly formatted responses
-            prompt = eval(image_prompt_generated[image_prompt_generated.find("{"):image_prompt_generated.rfind("}")+1])
-            prompt = prompt['prompt']
+            prompt = eval(image_prompt_generated[image_prompt_generated.find("{"):image_prompt_generated.rfind("}")+1])['image_prompt']
         print("************\n", prompt)
 
         # Generate images based on the crafted prompt
