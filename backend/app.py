@@ -1,4 +1,4 @@
-from backend.utility.googlesearch import get_news_summary
+from utility.googlesearch import get_news_summary
 import streamlit as st
 from dotenv import load_dotenv
 from utility.llm_call import gorq_call
@@ -25,7 +25,7 @@ if button:
         st.session_state.summary = get_news_summary(input_text)
         st.title("Summary")
         try:
-            data = ast.literal_eval(st.session_state.summary )
+            data = ast.literal_eval(st.session_state.summary)
             # data = json.loads(summary)
             st.json(data.get("SUMMARY", "No summary available."))
             
@@ -41,6 +41,7 @@ if button:
             data = str(st.session_state.summary).replace('{', '').replace('}', '')
             st.markdown(data)
             print("no json")
+            
     st.text(st.session_state.summary )
     text_generation_prompt=f"""Your are the helpfull assistent. Use the provided news information, craft an engaging and shareable text post. 
 Ensure the tone matches the context of the news—professional for formal news, empathetic for emotional news, or humorous for lighter stories. 

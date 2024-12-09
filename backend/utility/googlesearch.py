@@ -8,10 +8,13 @@ from vectara_agentic.agent import Agent
 from vectara_agentic.tools import ToolsFactory
 import streamlit as st
 import json, ast
+from utility.temp_history import SessionHistoryManager
+
 
 # Load environment variables
 load_dotenv(override=True)
 
+history_manager=SessionHistoryManager()
 
 # google_search_results = []
 # Define Pydantic schema for tool arguments
@@ -50,24 +53,31 @@ def google_search(args: GoogleSearchArgs) -> List[dict]:
     except requests.exceptions.RequestException as e:
         st.error(f"Error during Google Search API call: {e}")
         return []
-
-    # Parse results from API response
-    results = []
-    for item in response_data.get("items", []):
-        results.append({
-            "title": item.get("title"),
-            "link": item.get("link"),
-            "snippet": item.get("snippet"),
-            "source": item.get("displayLink"),
-        })
-    
-    if "google_search_results" not in st.session_state:
-        st.session_state.google_search_results = []
+    results=[]
+    if len(history_manager.get_history("xyz"))==0:
+        for item in response_data.get("items", []):
+            history_manager.add_entry("xyz",{
+                "title": item.get("title"),
+                "link": item.get("link"),
+                "snippet": item.get("snippet"),
+                "source": item.get("displayLink"),
+            })
+            results.append({
+                "title": item.get("title"),
+                "snippet": item.get("snippet")})
     else:
-        st.session_state.google_search_results.clear() 
-    
-    # Append the current search results to the session state list
-    st.session_state.google_search_results.append(results)
+         history_manager.clear_history("xyz")
+         for item in response_data.get("items", []):
+            history_manager.add_entry("xyz",{
+                "title": item.get("title"),
+                "link": item.get("link"),
+                "snippet": item.get("snippet"),
+                "source": item.get("displayLink"),
+            })
+            results.append({
+                "title": item.get("title"),
+                "snippet": item.get("snippet")})
+
     return results
 
 # Initialize ToolsFactory
