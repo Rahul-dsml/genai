@@ -47,8 +47,7 @@ GENAI/
 
 
 ## TECHNICAL ARCHITECTURE
-
-![alt text](image-1.png)
+![image](https://github.com/user-attachments/assets/f3064184-d16b-4ca5-b9f8-bd5fe551c14d)
 
 
 ## Tech Stacks
