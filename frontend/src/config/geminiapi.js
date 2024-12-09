@@ -1,5 +1,5 @@
 async function runChat(query, page) {
-  const API_BASE_URL = "http://3.110.50.190:8050/users";
+  const API_BASE_URL = "http://13.127.240.27:8050/users";
 
   // Determine the endpoint based on the page
   let endpoint;
