@@ -18,3 +18,7 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
+
+# Define a model for the input JSON
+class SummarizerInput(BaseModel):
+    query: str

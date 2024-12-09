@@ -13,6 +13,7 @@ import streamlit as st
 from utility.googlesearch import history_manager
 from utility.llm_call import gorq_call
 from utility.template_id import get_random_template,generate_meme
+from model import SummarizerInput
 
 logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ def signup(signup_request: SignupRequest):
 
 # Protected route (requires authentication)
 @router.get("/summarizer") # dependencies=[Depends(JWTBearer())]
-async def summarizer(query): # token: str =Depends(JWTBearer())
+async def summarizer(query: SummarizerInput): # token: str =Depends(JWTBearer())
     try:
         summary=await get_news_summary(query)
         # print(summary)
@@ -70,7 +71,7 @@ async def summarizer(query): # token: str =Depends(JWTBearer())
 
 
 @router.get("/text_post") # dependencies=[Depends(JWTBearer())]
-async def text_post(query): # dependencies=[Depends(JWTBearer())]
+async def text_post(query: SummarizerInput): # dependencies=[Depends(JWTBearer())]
     try:
         summary=history_manager.get_history("summary")[0]
         text_generation_prompt=f"""Your are the helpfull assistent. Use the provided news information, craft an engaging and shareable text post. 
@@ -104,7 +105,7 @@ Text Post:
 
 
 @router.get("/meme") # dependencies=[Depends(JWTBearer())]
-async def meme(query): # token: str =Depends(JWTBearer())
+async def meme(query: SummarizerInput): # token: str =Depends(JWTBearer())
     try:
         summary=history_manager.get_history("summary")[0]
         print(summary)
