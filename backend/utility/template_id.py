@@ -2,15 +2,6 @@ import random
 import requests
 
 
-# TEMPLATE_IDS = {
-#     "sad": ["61579", "8072285", "56225174"],  # One Does Not Simply, Crying Jordan, Sad Pablo Escobar
-#     "funny": ["112126428", "438680", "124822590"],  # Distracted Boyfriend, Batman Slapping Robin, Blank White Template
-#     "angry": ["181913649", "97984", "89370399"],  # Drakeposting, Angry Obama, Gru's Plan
-#     "disappointed": ["259680", "101470", "178591752"],  # Third World Skeptical Kid, Condescending Wonka, Buff Doge vs Cheems
-# }
-
-
-
 # Extended categories
 TEMPLATE_IDS = {
     "funny": [

@@ -1,4 +1,7 @@
 import replicate
+
+
+
 def generate_image(prompt, negative_prompt, guidance_scale=7.5, inference_steps=50,seed = 20):
     output = replicate.run(
         "cloneofsimo/realistic_vision_v1.3:db1c4227cbc7f985e335b2f0388cd6d3aa06d95087d6a71c5b3e07413738fa13",

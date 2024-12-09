@@ -22,6 +22,14 @@ class LoginResponse(BaseModel):
 # Define a model for the input JSON
 class SummarizerInput(BaseModel):
     query: str
-    
-class SummarizerInput(BaseModel):
+
+class TextInput(BaseModel):
     query: str
+
+class MemeInput(BaseModel):
+    query: str
+
+class ImageInput(BaseModel):
+    query: str
+    
+    

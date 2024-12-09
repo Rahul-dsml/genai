@@ -1,29 +1,27 @@
 from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
-from utility.auth_helper import create_access_token, encrypt_password, verify_password
-from typing import Optional
-from datetime import datetime, timedelta
-from model import *
-from utility.image_processing import generate_image, generate_image_using_prompt
-import bcrypt, replicate
-from utility.auth_bearer import JWTBearer
 from fastapi.responses import JSONResponse
-import logging
-import json
-from utility.auth_helper import fake_users_db
-from utility.googlesearch import get_news_summary
-import streamlit as st
-from utility.googlesearch import history_manager
+from utility.auth_helper import create_access_token, encrypt_password, verify_password
+from utility.image_processing import generate_image, generate_image_using_prompt
+from utility.googlesearch import history_manager,get_news_summary
 from utility.llm_call import gorq_call
 from utility.template_id import get_random_template,generate_meme
-from model import SummarizerInput
-from model import SummarizerInput
+from utility.auth_bearer import JWTBearer
+
+from datetime import datetime, timedelta
+from typing import Optional
+from model import *
+import replicate
+import logging
+import bcrypt
+import json
+
 
 logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-
+fake_users_db={}
 
 def hash_password(password: str) -> str:
     """Hash a plaintext password."""
@@ -59,11 +57,24 @@ def signup(signup_request: SignupRequest):
     return {"message": "User signed up successfully"}
 
 
-# Protected route (requires authentication)
-@router.post("/summarizer") # dependencies=[Depends(JWTBearer())]
-async def summarizer(query: SummarizerInput): # token: str =Depends(JWTBearer())
+
+@router.post("/summarizer") 
+async def summarizer(query: SummarizerInput):
+    """
+    Endpoint to generate a news summary based on user input and retrieve related metadata from history.
+
+    Args:
+        query (SummarizerInput): The user's input for generating a summary.
+
+    Returns:
+        JSONResponse: A response containing the generated summary and recent metadata.
+    """
     try:
-        
+        history_manager.clear_history("metadata")
+        history_manager.clear_history("summary")
+        history_manager.clear_history("post_history")
+        history_manager.clear_history("meme_history")
+        history_manager.clear_history("image_history")
         summary=await get_news_summary(query)
         
         metadata=history_manager.get_history("metadata")[:5]
@@ -71,11 +82,13 @@ async def summarizer(query: SummarizerInput): # token: str =Depends(JWTBearer())
         history_manager.add_entry("summary", summary)
         return JSONResponse(content={"summary":summary, "metadata":metadata}, status_code=200)
     except Exception as e:
-        return JSONResponse(content={"summary" : e, "metadata":"Bad Request"}, status_code=400)
+        # Handle unexpected errors and return a bad request response
+        print("Error:", e)
+        return JSONResponse(content={"summary" : "Bad Request", "metadata":"Bad Request"}, status_code=400)
 
 
-@router.post("/text") # dependencies=[Depends(JWTBearer())]
-async def text_post(query: SummarizerInput): # dependencies=[Depends(JWTBearer())]
+@router.post("/text") 
+async def text_post(query: TextInput): 
     try:
         summary=history_manager.get_history("summary")[0]
         text_post_history= str(history_manager.get_history("post_history")[:3])
@@ -108,11 +121,13 @@ Social Media Post:
         history_manager.add_entry("post_history", {"user": query, "assistant": text_post})
         return JSONResponse(content={"text_post":text_post},status_code=200)
     except Exception:
+        # Handle unexpected errors and return a bad request response
+        print("Error:", e)
         return JSONResponse(content={"text_post":"Bad Request"},status_code=400)
 
 
-@router.post("/memes") # dependencies=[Depends(JWTBearer())]
-async def meme(query: SummarizerInput): # token: str =Depends(JWTBearer())
+@router.post("/memes") 
+async def meme(query: MemeInput):
     try:
         summary=history_manager.get_history("summary")[0]
         meme_post_history = str(history_manager.get_history("meme_history")[:2])
@@ -165,14 +180,28 @@ Final output should be in the following JSON format:
                 print("-------------------------------------------")
         return JSONResponse(content={"memes_url":memes_url},status_code=200) # [meme_url,theme]
     except Exception as e:
-        return JSONResponse(content={"memes_url":e},status_code=400)
+        # Handle unexpected errors and return a bad request response
+        print("Error:", e)
+        return JSONResponse(content={"memes_url":"Bad Request"},status_code=400)
 
 
-@router.post("/images") # dependencies=[Depends(JWTBearer())]
-async def image_prompt(query: SummarizerInput): # dependencies=[Depends(JWTBearer())]
+@router.post("/images") 
+async def image_prompt(query: ImageInput): 
+    """
+    Endpoint to generate image prompts based on user input, conversation history, and a news summary.
+
+    Args:
+        query (ImageInput): The user's input for generating an image prompt.
+
+    Returns:
+        JSONResponse: A response containing the generated image URLs or an error message.
+    """
     try:
+        # Fetch the news summary and recent image generation history
         summary=history_manager.get_history("summary")[0]
         image_history= str(history_manager.get_history("image_history")[:3])
+
+        # Craft the input for the image generation prompt
         image_generation_prompt=f"""You are an expert in crafting prompts to generate images using large language models based on given news summary, user's current input and user's conversation history.
                                    Your task is to craft a detailed prompt to generate an image which will be used for social media networking and content marketing. 
                                    
@@ -194,23 +223,30 @@ current user input: ```{query}```
 Final output must be just the generated prompt without any tags or header:
 
 """
+        # Generate the image prompt using the LLM
         image_prompt_generated= await gorq_call(image_generation_prompt)
         try:
+            # Attempt to parse the generated prompt directly
             prompt = image_prompt_generated
             # prompt = eval(image_prompt_generated[image_prompt_generated.find("{"):image_prompt_generated.rfind("}")+1])
         except:
+            # Fallback parsing for improperly formatted responses
             prompt = eval(image_prompt_generated[image_prompt_generated.find("{"):image_prompt_generated.rfind("}")+1])
             prompt = prompt['prompt']
         print("************\n", prompt)
+
+        # Generate images based on the crafted prompt
         output = generate_image_using_prompt(prompt=prompt)
         print("|||||||||||||||||\n", output)
-        image_url = []
-        for i in output:
-            image_url.append(str(i))
+        # Collect image URLs
+        image_url = [str(i) for i in output]
         print(image_url)
+         # Update the conversation history
         history_manager.add_entry("image_history", {"user": query, "assistant": prompt})
-        
+        # Return the generated image URLs
         return JSONResponse(content={"image_post":image_url},status_code=200)
     except Exception as e:
-        return JSONResponse(content={"image_post":e},status_code=400)
+        # Handle unexpected errors and return a bad request response
+        print("Error:", e)
+        return JSONResponse(content={"image_post":"Bad Request"},status_code=400)
 
