@@ -16,6 +16,7 @@ from utility.googlesearch import history_manager
 from utility.llm_call import gorq_call
 from utility.template_id import get_random_template,generate_meme
 from model import SummarizerInput
+from model import SummarizerInput
 
 logging.basicConfig(level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
