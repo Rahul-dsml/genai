@@ -103,7 +103,7 @@ agent = Agent(
 )
 
 
-def get_news_summary(topic: str) -> dict:
+async def get_news_summary(topic: str) -> dict:
     """
     Interact with the agent to get a news summary for the given topic.
 

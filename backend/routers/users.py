@@ -59,7 +59,7 @@ def signup(signup_request: SignupRequest):
 @router.get("/summarizer") # dependencies=[Depends(JWTBearer())]
 async def summarizer(query): # token: str =Depends(JWTBearer())
     try:
-        summary=get_news_summary(query)
+        summary=await get_news_summary(query)
         # print(summary)
         metadata=history_manager.get_history("xyz")[:5]
         # print(metadata)
@@ -96,7 +96,7 @@ User Input:{query}
 final_response:
 Text Post:
 """
-        text_post=gorq_call(text_generation_prompt)
+        text_post= await gorq_call(text_generation_prompt)
 
         return JSONResponse(content={"text_post":text_post},status_code=200)
     except Exception as e:
@@ -137,15 +137,15 @@ Final output should be in the following JSON format:
 "Visual Description":(write prompt to generate the image),
 "Caption":(meme captions)}}]
 """
-        meme_post=gorq_call(meme_prompt)
+        meme_post=await gorq_call(meme_prompt)
         memes=eval(meme_post[meme_post.find("["):meme_post.rfind("]")+1])
         memes_url=[]
         for m in range(3):
             temp_id=get_random_template(memes[m]["sentiment"])
             USERNAME = "your_imgflip_username"
             PASSWORD = "your_imgflip_password"
-            print(temp_id)
-            meme_url=generate_meme(temp_id,memes[m]['Caption'],USERNAME,PASSWORD)
+            # print(temp_id)
+            meme_url=await generate_meme(temp_id,memes[m]['Caption'],USERNAME,PASSWORD)
             if meme_url:
                 memes_url.append([meme_url,memes[m]["Theme"]])
             else:

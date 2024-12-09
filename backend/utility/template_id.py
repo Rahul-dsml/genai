@@ -132,7 +132,7 @@ def get_random_template(category):
     return random.choice(templates)
 
 
-def generate_meme(template_id, text0, username, password):
+async def generate_meme(template_id, text0, username, password):
     url = "https://api.imgflip.com/caption_image"
     payload = {
         "template_id": template_id,

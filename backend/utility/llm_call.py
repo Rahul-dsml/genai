@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def gorq_call(prompt,model_id="llama-3.2-90b-vision-preview"):
+async def gorq_call(prompt,model_id="llama-3.2-90b-vision-preview"):
     client = Groq(
         api_key=os.environ.get("GROQ_API_KEY"),
     )
